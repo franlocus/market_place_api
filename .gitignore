@@ -27,3 +27,6 @@
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+
+/.rubocop.yml
+/.rubocop_todo.yml
