@@ -192,6 +192,8 @@ GEM
     rubocop-rspec (2.15.0)
       rubocop (~> 1.33)
     ruby-progressbar (1.11.0)
+    shoulda-matchers (5.2.0)
+      activesupport (>= 5.2.0)
     thor (1.2.1)
     timeout (0.3.0)
     tzinfo (2.0.5)
@@ -217,6 +219,7 @@ DEPENDENCIES
   rubocop-performance (~> 1.15)
   rubocop-rails (~> 2.17)
   rubocop-rspec (~> 2.13)
+  shoulda-matchers (~> 5.2)
   tzinfo-data
 
 RUBY VERSION
