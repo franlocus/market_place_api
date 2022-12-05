@@ -34,31 +34,55 @@ RSpec.describe 'Api::V1::Users' do
   end
 
   describe 'PATCH /users#update' do
-    before do
-      patch api_v1_user_path(user), params: { user: { email: 'happy-buddy@test.org', password: '123456' } }
+    context 'with authorization' do
+      before do
+        params = Hash(user: { email: 'happy-buddy@test.org', password: '123456' })
+        headers = Hash(Authorization: JsonWebToken.encode(user_id: user.id))
+
+        patch(api_v1_user_path(user), params:, headers:)
+      end
+
+      it { expect(response).to have_http_status(:success) }
+
+      it 'updates a user' do
+        json_response = JSON.parse(response.body)
+        expect(json_response['email']).to eq('happy-buddy@test.org')
+      end
+
+      it 'doesnt update a user when invalid params are sent' do
+        params = Hash(user: { email: 'bad_email', password: '123456' })
+        headers = Hash(Authorization: JsonWebToken.encode(user_id: user.id))
+
+        post(api_v1_users_path, params:, headers:)
+
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
     end
 
-    it { expect(response).to have_http_status(:success) }
+    context 'without authorization' do
+      before do
+        patch api_v1_user_path(user), params: { user: { email: 'happy-buddy@test.org', password: '123456' } }
+      end
 
-    it 'updates a user' do
-      json_response = JSON.parse(response.body)
-      expect(json_response['email']).to eq('happy-buddy@test.org')
-    end
-
-    it 'doesnt update a user when invalid params are sent' do
-      post api_v1_users_path, params: { user: { email: 'bad_email', password: '123456' } }
-
-      expect(response).to have_http_status(:unprocessable_entity)
+      it { expect(response).to have_http_status(:forbidden) }
     end
   end
 
   describe 'DELETE /users#destroy' do
-    before { delete api_v1_user_path(user) }
+    context 'with authorization' do
+      before { delete api_v1_user_path(user), headers: { Authorization: JsonWebToken.encode(user_id: user.id) } }
 
-    it { expect(response).to have_http_status(:no_content) }
+      it { expect(response).to have_http_status(:no_content) }
 
-    it 'deleted the user' do
-      expect { user.reload }.to raise_error(ActiveRecord::RecordNotFound)
+      it 'deleted the user' do
+        expect { user.reload }.to raise_error(ActiveRecord::RecordNotFound)
+      end
+    end
+
+    context 'without authorization' do
+      before { delete api_v1_user_path(user) }
+
+      it { expect(response).to have_http_status(:forbidden) }
     end
   end
 end
