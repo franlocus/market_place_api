@@ -10,7 +10,7 @@ RSpec.describe 'Api::V1::Users' do
 
     it 'show user' do
       json_response = JSON.parse(response.body)
-      expect(json_response['email']).to eq(user.email)
+      expect(json_response['data']['attributes']['email']).to eq(user.email)
     end
   end
 
@@ -23,7 +23,7 @@ RSpec.describe 'Api::V1::Users' do
 
     it 'creates a user' do
       json_response = JSON.parse(response.body)
-      expect(json_response['email']).to eq('buddy@test.org')
+      expect(json_response['data']['attributes']['email']).to eq('buddy@test.org')
     end
 
     it 'doesnt create a user with taken email' do
@@ -45,7 +45,7 @@ RSpec.describe 'Api::V1::Users' do
 
       it 'updates a user' do
         json_response = JSON.parse(response.body)
-        expect(json_response['email']).to eq('happy-buddy@test.org')
+        expect(json_response['data']['attributes']['email']).to eq('happy-buddy@test.org')
       end
 
       it 'doesnt update a user when invalid params are sent' do
