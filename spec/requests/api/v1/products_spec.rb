@@ -11,7 +11,7 @@ RSpec.describe 'Api::V1::Products' do
 
     it 'returns indexed products' do
       json_response = JSON.parse(response.body)
-      expect(json_response.size).to eq(Product.count)
+      expect(json_response['data'].size).to eq(Product.count)
     end
   end
 
@@ -22,7 +22,7 @@ RSpec.describe 'Api::V1::Products' do
 
     it 'returns show product' do
       json_response = JSON.parse(response.body)
-      expect(json_response['title']).to eq(product.title)
+      expect(json_response['data']['attributes']['title']).to eq(product.title)
     end
   end
 
