@@ -36,10 +36,9 @@ RSpec.describe 'Api::V1::Users' do
   describe 'PATCH /users#update' do
     context 'with authorization' do
       before do
-        params = Hash(user: { email: 'happy-buddy@test.org', password: '123456' })
-        headers = Hash(Authorization: JsonWebToken.encode(user_id: user.id))
-
-        patch(api_v1_user_path(user), params:, headers:)
+        patch api_v1_user_path(user),
+              params: { user: { email: 'happy-buddy@test.org', password: '123456' } },
+              headers: { Authorization: JsonWebToken.encode(user_id: user.id) }
       end
 
       it { expect(response).to have_http_status(:success) }
@@ -50,10 +49,9 @@ RSpec.describe 'Api::V1::Users' do
       end
 
       it 'doesnt update a user when invalid params are sent' do
-        params = Hash(user: { email: 'bad_email', password: '123456' })
-        headers = Hash(Authorization: JsonWebToken.encode(user_id: user.id))
-
-        post(api_v1_users_path, params:, headers:)
+        patch api_v1_user_path(user),
+              params: { user: { email: 'bad_email', password: '123456' } },
+              headers: { Authorization: JsonWebToken.encode(user_id: user.id) }
 
         expect(response).to have_http_status(:unprocessable_entity)
       end
