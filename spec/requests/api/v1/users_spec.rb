@@ -9,8 +9,11 @@ RSpec.describe 'Api::V1::Users' do
     it { expect(response).to have_http_status(:ok) }
 
     it 'show user' do
-      json_response = JSON.parse(response.body)
-      expect(json_response['data']['attributes']['email']).to eq(user.email)
+      json_response = JSON.parse(response.body, symbolize_names: true)
+
+      expect(json_response.dig(:data, :attributes, :email)).to eq(user.email)
+      expect(json_response.dig(:data, :relationships, :products, :data, 0, :id)).to eq(user.products.first.id.to_s)
+      expect(json_response.dig(:included, 0, :attributes, :title)).to eq(user.products.first.title)
     end
   end
 
