@@ -13,6 +13,23 @@ RSpec.describe 'Api::V1::Products' do
       json_response = JSON.parse(response.body)
       expect(json_response['data'].size).to eq(Product.count)
     end
+
+    context 'when using search params' do
+      before do
+        create(:product, title: 'A cheap tv', price: 50)
+        get api_v1_products_path, params: { keyword: 'TV', max_price: 50 }
+      end
+
+      it 'returns a filtered product by keyword' do
+        json_response = JSON.parse(response.body)
+        expect(json_response['data'].first['attributes']['title']).to match(/A cheap TV/i)
+      end
+
+      it 'returns a filtered product by price' do
+        json_response = JSON.parse(response.body)
+        expect(json_response['data'].first['attributes']['price'].to_i).to eq(50)
+      end
+    end
   end
 
   describe 'GET /show' do
