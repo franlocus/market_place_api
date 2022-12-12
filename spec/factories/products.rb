@@ -3,6 +3,7 @@ FactoryBot.define do
     title { 'Notebook' }
     price { '99.99' }
     published { false }
+    quantity { 5 }
     user
   end
 end

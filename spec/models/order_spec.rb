@@ -16,4 +16,16 @@ RSpec.describe Order do
       expect(products.sum(&:price)).to eq(order.total)
     end
   end
+
+  context 'when managing quantities' do
+    let!(:order) { create(:order) }
+
+    it 'builds 2 placements for the order' do
+      products = [create(:product), create(:product)]
+
+      order.build_placements_with_product_ids_and_quantities [{ product_id: products.first.id, quantity: 2 },
+                                                              { product_id: products.last.id, quantity: 3 }]
+      expect { order.save }.to change(Placement, :count)
+    end
+  end
 end

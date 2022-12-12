@@ -42,17 +42,21 @@ RSpec.describe 'Api::V1::Orders' do
   end
 
   describe 'POST /create' do
-    let!(:order_params) { { order: { product_ids: [create(:product).id, create(:product).id] } } }
+    let!(:products) { [create(:product), create(:product)] }
+    let!(:order_params) do
+      { order: { product_ids_and_quantities: [{ product_id: products.first.id, quantity: 2 },
+                                              { product_id: products.last.id, quantity: 3 }] } }
+    end
 
     context 'with authorization' do
       it 'creates an order with two products' do
-        post  api_v1_orders_path,
-              headers: { Authorization: JsonWebToken.encode(user_id: order.user.id) },
-              params: order_params
+        expect do
+          post  api_v1_orders_path,
+                headers: { Authorization: JsonWebToken.encode(user_id: order.user.id) },
+                params: order_params
+        end.to change(Order, :count).by(1).and(change(Placement, :count).by(2))
 
         expect(response).to have_http_status(:created)
-        json_response = JSON.parse(response.body)
-        expect(json_response['total']).to eq('199.98')
       end
     end
 
