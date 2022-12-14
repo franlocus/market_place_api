@@ -27,5 +27,12 @@ RSpec.describe Order do
                                                               { product_id: products.last.id, quantity: 3 }]
       expect { order.save }.to change(Placement, :count)
     end
+
+    it 'checks order doesnt contain more products than available' do
+      product = create(:product)
+      order.placements << Placement.new(product_id: product.id, quantity: (1 + product.quantity))
+
+      expect(order).not_to be_valid
+    end
   end
 end
