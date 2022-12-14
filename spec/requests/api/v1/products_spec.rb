@@ -14,6 +14,13 @@ RSpec.describe 'Api::V1::Products' do
       expect(json_response['data'].size).to eq(Product.count)
     end
 
+    it 'returns products with pagination links' do
+      json_response = JSON.parse(response.body, symbolize_names: true)
+      expected_pagination_symbols = %i[first last prev next]
+
+      expect(json_response[:links].keys).to eq(expected_pagination_symbols)
+    end
+
     context 'when using search params' do
       before do
         create(:product, title: 'A cheap tv', price: 50)
