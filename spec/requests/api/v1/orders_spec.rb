@@ -6,12 +6,22 @@ RSpec.describe 'Api::V1::Orders' do
 
   describe 'GET /index' do
     context 'with authorization' do
-      it 'returns status ok with user orders' do
+      before do
         get api_v1_orders_path, headers: { Authorization: JsonWebToken.encode(user_id: order.user_id) }
+      end
+
+      it 'returns status ok with user orders' do
         expect(response).to have_http_status(:ok)
 
         json_response = JSON.parse(response.body)
         expect(json_response['data'].count).to eq(order.user.orders.count)
+      end
+
+      it 'returns users orders with pagination links' do
+        json_response = JSON.parse(response.body, symbolize_names: true)
+        expected_pagination_symbols = %i[first last prev next]
+
+        expect(json_response[:links].keys).to eq(expected_pagination_symbols)
       end
     end
 
