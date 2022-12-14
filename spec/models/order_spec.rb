@@ -1,6 +1,9 @@
 require 'rails_helper'
 
 RSpec.describe Order do
+  let!(:order) { create(:order) }
+  let!(:products) { [create(:product, price: rand(0.0..1000)), create(:product, price: rand(0.0..1000))] }
+
   it { is_expected.to validate_presence_of(:user_id) }
   it { is_expected.to belong_to(:user) }
   it { is_expected.to have_many(:placements).dependent(:destroy) }
@@ -8,21 +11,16 @@ RSpec.describe Order do
 
   context 'when creating an order' do
     it 'sets its total' do
-      products = [create(:product, price: rand(0.0..1000)), create(:product, price: rand(0.0..1000))]
-
-      order = described_class.new(user_id: create(:user).id)
-      order.products << products
-      order.save
-      expect(products.sum(&:price)).to eq(order.total)
+      order.placements = [Placement.new(product_id: products.first.id, quantity: 2),
+                          Placement.new(product_id: products.last.id, quantity: 2)]
+      order.set_total!
+      expected_total = (products.first.price * 2) + (products.last.price * 2)
+      expect(order.total).to eq(expected_total)
     end
   end
 
   context 'when managing quantities' do
-    let!(:order) { create(:order) }
-
-    it 'builds 2 placements for the order' do
-      products = [create(:product), create(:product)]
-
+    it 'builds placements for the order' do
       order.build_placements_with_product_ids_and_quantities [{ product_id: products.first.id, quantity: 2 },
                                                               { product_id: products.last.id, quantity: 3 }]
       expect { order.save }.to change(Placement, :count)

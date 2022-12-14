@@ -20,9 +20,7 @@ class Order < ApplicationRecord
     end
   end
 
-  private
-
   def set_total!
-    self.total = products.sum(&:price)
+    self.total = placements.sum { |placement| placement.product.price * placement.quantity }
   end
 end
