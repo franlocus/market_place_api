@@ -16,12 +16,12 @@ RSpec.describe Product do
   describe 'search scopes' do
     context 'when filtering by title' do
       it 'returns products filtered by title' do
-        expect(described_class.filter_by_title('tv').count).to eq(3)
+        expect(described_class.keyword('tv').count).to eq(3)
       end
 
       it 'returns products filtered by title and sorted' do
         create(:product, title: 'Z TV Cheaper')
-        filtered_and_sorted_tvs = described_class.filter_by_title('tv').sort
+        filtered_and_sorted_tvs = described_class.keyword('tv').sort
 
         expect(filtered_and_sorted_tvs.first.title).to match(/A TV/)
         expect(filtered_and_sorted_tvs.last.title).to match(/Z TV/)
@@ -29,8 +29,8 @@ RSpec.describe Product do
     end
 
     context 'when filtering by price' do
-      it { expect(described_class.above_or_equal_to_price(300).count).to eq(2)  }
-      it { expect(described_class.below_or_equal_to_price(300).order(:price).last.price).to eq(200)  }
+      it { expect(described_class.min_price(300).count).to eq(2)  }
+      it { expect(described_class.max_price(300).order(:price).last.price).to eq(200) }
     end
 
     context 'when filtering by creation date' do
@@ -60,6 +60,11 @@ RSpec.describe Product do
     it 'returns empty when no product found' do
       search_hash = { keyword: 'videogame', max_price: 450 }
       expect(described_class.search(search_hash)).to be_empty
+    end
+
+    it 'ignores invalid params' do
+      search_hash = { color: 'blue', product_ids: [described_class.first.id] }
+      expect(described_class.search(search_hash)).to eq([described_class.first])
     end
   end
 end

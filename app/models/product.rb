@@ -7,19 +7,21 @@ class Product < ApplicationRecord
   has_many :placements, dependent: :destroy
   has_many :orders, through: :placements
 
-  scope :filter_by_title, ->(keyword) { where('lower(title) LIKE ?', "%#{keyword.downcase}%") }
-  scope :above_or_equal_to_price, ->(price) { where('price >= ?', price) }
-  scope :below_or_equal_to_price, ->(price) { where('price <= ?', price) }
+  scope :keyword, ->(keyword) { where('lower(title) LIKE ?', "%#{keyword.downcase}%") }
+  scope :min_price, ->(price) { where('price >= ?', price) }
+  scope :max_price, ->(price) { where('price <= ?', price) }
   scope :recent, -> { order(:updated_at) }
 
   def self.search(params = {})
-    # TODO: refactor
     products = params[:product_ids].present? ? Product.where(id: params[:product_ids]) : Product.all
 
-    products = products.filter_by_title(params[:keyword]) if params[:keyword].present?
-    products = products.above_or_equal_to_price(params[:min_price]) if params[:min_price].present?
-    products = products.below_or_equal_to_price(params[:max_price]) if params[:max_price].present?
-    products = products.recent if params[:recent].present?
+    allowed_params = %i[keyword min_price max_price recent]
+
+    params.each do |param, value|
+      next unless allowed_params.include?(param.to_sym)
+
+      products = products.send(param, value)
+    end
 
     products
   end
